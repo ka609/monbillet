@@ -1,0 +1,121 @@
+<!-- templates/concert/form.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Formulaire Concert</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body { background: #f6f7fb; }
+        .card-form { border-radius: 12px; box-shadow: 0 6px 18px rgba(29,31,47,0.08); }
+        .form-header {
+            background: linear-gradient(90deg, #4f46e5 0%, #06b6d4 100%);
+            color: #fff; padding: 18px;
+            border-top-left-radius: 12px; border-top-right-radius: 12px;
+        }
+        .img-preview { max-height: 200px; margin-top: 10px; border-radius: 8px; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}"><i class="bi bi-music-note-beamed"></i> MonBillet</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card card-form">
+                <div class="form-header">
+                    <h5 th:text="${title}"></h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <!-- Formulaire multipart pour upload image -->
+                    <form th:action="@{${action}}" th:object="${concert}" method="post" enctype="multipart/form-data">
+
+                        <input type="hidden" name="_method" th:value="${method}" />
+
+                        <div class="mb-3">
+                            <label for="titre" class="form-label">Titre</label>
+                            <input type="text" id="titre" th:field="*{titre}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="4" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dateHeure" class="form-label">Date & heure</label>
+
+                                <!-- DATE LOCALDATE-TIME CORRECTEMENT FORMATTÉE -->
+                                <input type="datetime-local"
+                                       id="dateHeure"
+                                       th:field="*{dateHeure}"
+                                       th:value="${concert.dateHeure != null ? #temporals.format(concert.dateHeure, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                                       class="form-control"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="lieu" class="form-label">Lieu</label>
+                                <input type="text" id="lieu" th:field="*{lieu}" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="prix" class="form-label">Prix (€)</label>
+                                <input type="number" min="0" step="0.01" id="prix" th:field="*{prix}" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="places" class="form-label">Places disponibles</label>
+                                <input type="number" min="0" id="places" th:field="*{placesDisponibles}" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Affiche (image)</label>
+                                <input type="file" class="form-control" name="afficheFile" accept="image/*" onchange="previewImage(event)">
+                                <img id="preview" class="img-preview" th:if="*{afficheUrl}" th:src="*{afficheUrl}">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a th:href="@{/concerts}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Annuler
+                            </a>
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> <span th:text="${buttonText}"></span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        const img = document.getElementById('preview');
+        img.src = URL.createObjectURL(event.target.files[0]);
+        img.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

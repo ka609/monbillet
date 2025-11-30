@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Réservation - Sélection de tickets</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<h1 th:text="'Réserver pour ' + ${concert.titre}">Concert</h1>
+
+<form th:action="@{/reservation/create}" method="post">
+    <input type="hidden" th:name="concertId" th:value="${concert.id}" />
+    <ul>
+        <li th:each="ticket : ${tickets}">
+            <input type="checkbox" th:name="ticketIds" th:value="${ticket.id}" />
+            Ticket #<span th:text="${ticket.id}"></span> -
+            <span th:text="${ticket.prix} + ' €'"></span>
+        </li>
+    </ul>
+    <button type="submit">Réserver</button>
+</form>
+<a th:href="@{/concerts}">Retour aux concerts</a>
+</body>
+</html>
