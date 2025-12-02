@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des concerts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div class="container mt-5">
+    <h1>Concerts</h1>
+    <a href="/admin/concerts/new" class="btn btn-success mb-3">
+        <i class="fas fa-plus"></i>
+    </a>
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Date & Heure</th>
+            <th>Lieu</th>
+            <th>Prix</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="concert : ${concerts}">
+            <td th:text="${concert.id}">1</td>
+            <td th:text="${concert.titre}">Concert</td>
+            <td th:text="${concert.dateHeure != null} ? ${#temporals.format(concert.dateHeure, 'dd/MM/yyyy HH:mm')} : 'Non défini'">01/12/2025 20:00</td>
+            <td th:text="${concert.lieu}">Ouagadougou</td>
+            <td th:text="${concert.prix}">1000</td>
+            <td>
+                <a th:href="@{/admin/concerts/edit/{id}(id=${concert.id})}" class="btn btn-primary btn-sm" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <a th:href="@{/admin/concerts/delete/{id}(id=${concert.id})}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('Voulez-vous vraiment supprimer ce concert ?')" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <a href="/admin/dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Retour au dashboard
+    </a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

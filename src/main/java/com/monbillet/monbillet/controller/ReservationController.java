@@ -43,14 +43,14 @@ public class ReservationController {
         reservation.setConcert(concert);
         reservation.setQuantite(quantite);
 
-        // Si l'utilisateur est connecté, on l'associe
+        // Associer l'utilisateur connecté
         if (auth != null && auth.isAuthenticated()) {
             String username = auth.getName();
             User user = userService.findByUsername(username);
             reservation.setUser(user);
         }
 
-        reservationService.save(reservation);
+        reservationService.saveReservation(reservation);
         return "redirect:/concerts/" + concertId + "?reserved=true";
     }
 }

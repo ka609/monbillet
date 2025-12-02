@@ -14,16 +14,19 @@ public class AuthController {
         this.userService = userService;
     }
 
+    /** Page de login */
     @GetMapping("/login")
     public String loginPage() {
         return "auth/login";
     }
 
+    /** Page d'inscription */
     @GetMapping("/register")
     public String registerPage() {
         return "auth/register";
     }
 
+    /** Traitement de l'inscription */
     @PostMapping("/register")
     public String processRegister(
             @RequestParam String nomComplet,

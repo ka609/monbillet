@@ -7,6 +7,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -28,45 +29,67 @@ public class SecurityConfig {
         return provider;
     }
 
+    /** SuccessHandler pour redirection selon rôle */
+    @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            if (isAdmin) {
+                response.sendRedirect("/admin/dashboard");
+            } else {
+                response.sendRedirect("/concerts");
+            }
+        };
+    }
+
     /** Configuration de sécurité */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
+        // --- Désactivation CSRF pour simplification (attention production) ---
         http.csrf(csrf -> csrf.disable());
+
+        // --- Provider d'authentification ---
         http.authenticationProvider(authenticationProvider());
 
+        // --- Autorisations selon rôle ---
         http.authorizeHttpRequests(auth -> auth
-                // --- PAGES ACCESSIBLES SANS COMPTE ---
+                // Pages publiques
                 .requestMatchers("/", "/login", "/register",
-                        "/concerts/**", "/reservations/create/**",
                         "/css/**", "/js/**", "/images/**",
                         "/h2-console/**").permitAll()
 
-                // --- ACTIONS RÉSERVÉES AUX UTILISATEURS CONNECTÉS ---
-                .requestMatchers("/concerts/add", "/concerts/save",
-                        "/concerts/edit/**", "/concerts/delete/**")
-                .hasRole("USER")
+                // ADMIN : dashboard, gestion utilisateurs, concerts et réservations
+                .requestMatchers("/admin/**").hasRole("ADMIN")
 
+                // UTILISATEUR : réserver, ajouter/éditer/supprimer concerts (si ton business le permet)
+                .requestMatchers("/concerts/add", "/concerts/save",
+                        "/concerts/edit/**", "/concerts/delete/**",
+                        "/reservations/create/**").hasRole("USER")
+
+                // Toute autre requête nécessite authentification
                 .anyRequest().authenticated()
         );
 
-        // --- LOGIN STANDARD ---
+        // --- Formulaire de login ---
         http.formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/concerts", true)
+                .successHandler(successHandler()) // redirection dynamique
                 .failureUrl("/login?error=true")
                 .permitAll()
         );
 
-        // --- LOGOUT ---
+        // --- Logout ---
         http.logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/concerts")
+                .logoutSuccessUrl("/login?logout=true")
                 .permitAll()
         );
 
-        // Autoriser la console H2
+        // --- H2 console ---
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
